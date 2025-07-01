@@ -68,7 +68,7 @@ services:
   backend-report:
     build: ./backend-report
     depends_on:
-      - backend-report
+      - backend
     environment:
       - MONGO_URI=mongodb://root:rootpassword@mongodb:27017/
       - VIRTUAL_HOST=backend-report.local

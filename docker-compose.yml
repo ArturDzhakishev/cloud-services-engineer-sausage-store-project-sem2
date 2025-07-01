@@ -52,7 +52,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      mongodb:
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgresql:5432/sausage-store
       - POSTGRES_USER=store
@@ -66,6 +65,7 @@ services:
     build: ./backend-report
     depends_on:
       - backend
+      - mongodb
     environment:
       - MONGO_URI=mongodb://root:rootpassword@mongodb:27017/
       - VIRTUAL_HOST=backend-report.local

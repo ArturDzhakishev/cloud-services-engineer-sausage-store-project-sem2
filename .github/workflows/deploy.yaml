@@ -38,9 +38,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/user/sausge-store/ 
-            sudo docker-compose -f docker-compose.prod.yml pull
-            sudo docker-compose -f docker-compose.prod.yml down
-            sudo docker-compose -f docker-compose.prod.yml up -d
+            sudo docker-compose -f docker-compose.yml pull
+            sudo docker-compose -f docker-compose.yml down
+            sudo docker-compose -f docker-compose.yml up -d
 
   # Сборка и пуш образов в докерхаб:
   # build_and_push_to_docker_hub:

@@ -33,7 +33,10 @@ services:
     #   - "80"
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        VERSION: "1.0.0"
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgresql:5432/sausage-store
       - POSTGRES_USER=store

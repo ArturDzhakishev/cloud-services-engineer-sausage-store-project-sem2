@@ -74,11 +74,9 @@ services:
     #   - "8080"
 
   nginx-proxy:
-    image: jwilder/nginx-proxy
-    depends_on:
-      - frontend
+    image: nginx:alpine
+    volumes:
+      - ./frontend/nginx_test.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./frontend/nginx.tmpl:/app/nginx.tmpl:ro
+

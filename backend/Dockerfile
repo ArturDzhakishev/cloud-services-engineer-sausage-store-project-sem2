@@ -9,6 +9,8 @@ WORKDIR /usr/src/app
 COPY ./src ./src
 COPY *.xml ./
 
+ARG VERSION=1.0.0
+
 RUN mvn package -Dversion.application=${VERSION}
 
 # release

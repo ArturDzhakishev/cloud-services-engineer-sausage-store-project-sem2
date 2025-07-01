@@ -1,42 +1,20 @@
-{{ $frontend := where $ "Env.VIRTUAL_HOST" "frontend.local" }}
-{{ $backend := where $ "Env.VIRTUAL_HOST" "backend.local" }}
-{{ $backendReport := where $ "Env.VIRTUAL_HOST" "backend-report.local" }}
-
-# Upstream для frontend
 upstream frontend {
-{{ range $index, $value := $frontend }}
-  {{ with $address := index $value.Addresses 0 }}
-  server {{ $value.Hostname }}:{{ $address.Port }};
-  {{ end }}
-{{ end }}
+  server frontend:80;
 }
 
-# Upstream для backend
 upstream backend {
-{{ range $index, $value := $backend }}
-  {{ with $address := index $value.Addresses 0 }}
-  server {{ $value.Hostname }}:{{ $address.Port }};
-  {{ end }}
-{{ end }}
+  server backend:8080;
 }
 
-# Upstream для backend-report
 upstream backend_report {
-{{ range $index, $value := $backendReport }}
-  {{ with $address := index $value.Addresses 0 }}
-  server {{ $value.Hostname }}:{{ $address.Port }};
-  {{ end }}
-{{ end }}
+  server backend-report:8080;
 }
 
-# Один сервер
 server {
   listen 80;
 
   location / {
-    root   /usr/share/nginx/html;
-    index  index.html;
-    try_files $uri $uri/ /index.html;
+    proxy_pass http://frontend;
   }
 
   location /api {

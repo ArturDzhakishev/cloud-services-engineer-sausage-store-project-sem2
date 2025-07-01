@@ -72,7 +72,7 @@ services:
       - backend
       - mongodb
     environment:
-      - MONGO_URI=mongodb://root:rootpassword@mongodb:27017/
+      - DB=mongodb://root:rootpassword@mongodb:27017/
       - VIRTUAL_HOST=backend-report.local
       - VIRTUAL_PORT=8080
 

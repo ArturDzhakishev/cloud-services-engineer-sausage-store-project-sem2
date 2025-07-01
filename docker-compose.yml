@@ -5,9 +5,9 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
+      POSTGRES_USER: store
+      POSTGRES_PASSWORD: storepassword
+      POSTGRES_DB: sausage-store
     ports:
       - "5432:5432"   # проброс наружу, если хочешь подключаться с хоста
     volumes:
@@ -25,7 +25,7 @@ services:
       - ./data/mongo:/data/db
 
   frontend:
-    buid: ./frontend
+    build: ./frontend
     environment:
       - VIRTUAL_HOST=frontend.local
       - VIRTUAL_PORT=80   # порт NGINX внутри контейнера
@@ -33,7 +33,7 @@ services:
       - "80"
 
   backend:
-    buid: ./backend
+    build: ./backend
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgresql:5432/sausage-store
       - POSTGRES_USER=store
@@ -59,4 +59,4 @@ services:
       - "80:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./nginx.tmpl:/app/nginx.tmpl:ro
+      - ./frontend/nginx.tmpl:/app/nginx.tmpl:ro

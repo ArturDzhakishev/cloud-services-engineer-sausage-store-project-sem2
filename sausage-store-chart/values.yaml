@@ -15,11 +15,12 @@ frontend:
   service:
     port: 80
   ingress:
-    host: YOUR_STUDENT_HOSTNAME.students-projects.ru # Корректный домен будет указан в задании
+    host: front-artur.2sem.students-projects.ru # Корректный домен будет указан в задании
     path: /
     pathType: Prefix
+  secretName: 2sem-students-projects-wildcard-secret
   containerPort: 80
-  image: YOUR_DOCKERHUB/sausage-frontend:latest
+  image: arturdzh/sausage-frontend:latest
   resources:
     requests:
       memory: "128Mi"
@@ -45,8 +46,12 @@ backend:
   revisionHistoryLimit: 15
   replicas: 1
   strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   ### Опишите стратегию RollingUpdate для бэкенда
-  image: YOUR_DOCKERHUB/sausage-backend:latest
+  image: arturdzh/sausage-backend:latest
   imagePullPolicy: Always
   resources:
     requests:
@@ -57,11 +62,57 @@ backend:
       cpu: "1"
   containerPort: 8080
   livenessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
   ### Опишите LivenessProbe для бэкенда
   vpa:
+    updatePolicy:
+      updateMode: "Auto"
+    resourcePolicy:
+      containerPolicies:
+        - containerName: "*"
+          minAllowed:
+            cpu: "100m"
+            memory: "128Mi"
+          maxAllowed:
+            cpu: "2"
+            memory: "1Gi"
   ### Опишите VPA для бэкенда
 
 backend-report:
+  env:
+    port: "8080"
+  revisionHistoryLimit: 15
+  replicas: 1
+  image: arturdzh/sausage-backend-report:latest
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "1"
+  containerPort: 8080
+  livenessProbe:
+    httpGet:
+      path: /api/v1/health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  secret:
+    DB: "mongodb://root:rootpassword@mongodb:27017/reports"
 ### Опишите значения для backend-report
 ### Приложение должно использовать стратегию Recreate
 ### Приложение использует переменную PORT - порт, на котором оно запустится и DB - Uri-подключение к mongodb. 
@@ -70,6 +121,11 @@ backend-report:
 
 infra:
   postgresql:
+    containerPort: 5432
+    env:
+      POSTGRES_USER: store
+      POSTGRES_PASSWORD: storepassword
+      POSTGRES_DB: sausage-store
   ### Опишите необходимые переменные для развертывания PostgresQL в кластере Kubernetes
   mongodb:
     env:

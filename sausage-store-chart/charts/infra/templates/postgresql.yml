@@ -58,6 +58,6 @@ kind: ConfigMap
 metadata:
   name: postgres-conf
 data:
-  POSTGRES_USER: {{ .Values.postgresql.env.POSTGRES_USER }}
-  POSTGRES_PASSWORD: {{ .Values.postgresql.env.POSTGRES_PASSWORD }}
-  POSTGRES_DB: {{ .Values.postgresql.env.POSTGRES_DB }}
+  POSTGRES_USER: {{ .Values.postgresql.env.POSTGRES_USER | quote }}
+  POSTGRES_PASSWORD: {{ .Values.postgresql.env.POSTGRES_PASSWORD | quote }}
+  POSTGRES_DB: {{ .Values.postgresql.env.POSTGRES_DB | quote }}

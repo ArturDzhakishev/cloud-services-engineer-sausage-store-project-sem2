@@ -1,0 +1,548 @@
+---
+# Source: sausage-store/charts/backend-report/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-backend-report-secret
+  namespace: r-devops-magistracy-project-2sem-879048678
+type: Opaque
+stringData:
+  DB: mongodb://root:rootpassword@mongodb:27017/reports
+---
+# Source: sausage-store/charts/backend-report/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-backend-report-conf
+data:
+  PORT: 8080
+---
+# Source: sausage-store/charts/backend/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-backend-conf
+data:
+  postgres_uri: jdbc:postgresql://postgresql:5432/sausage-store
+  postgres_user: store
+  postgres_password: storepassword
+  report_path: /logs/reports
+  log_path: /logs
+---
+# Source: sausage-store/charts/frontend/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-frontend-conf
+data:
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile        on;
+        keepalive_timeout  65;
+        server {
+
+          listen       80;
+
+          location / {
+              root   /usr/share/nginx/html;
+              index  index.html;
+              try_files $uri $uri/ /index.html;
+          }
+
+            location /api {
+              proxy_pass http://test-backend-service:8080;
+          }
+
+          error_page   500 502 503 504  /50x.html;
+          location = /50x.html {
+              root   /usr/share/nginx/html;
+          }
+      }
+
+    }
+---
+# Source: sausage-store/charts/infra/templates/mongodb.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-conf
+data:
+  MONGO_INITDB_ROOT_USERNAME: root
+  MONGO_INITDB_ROOT_PASSWORD: rootpassword
+---
+# Source: sausage-store/charts/infra/templates/postgresql.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-conf
+data:
+  POSTGRES_USER: store
+  POSTGRES_PASSWORD: storepassword
+  POSTGRES_DB: sausage-store
+---
+# Source: sausage-store/charts/backend-report/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-backend-report-service
+  labels:
+    app: test-backend-report-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: test-backend-report
+---
+# Source: sausage-store/charts/backend/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-backend-service
+  labels:
+    app: test-backend-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: test-backend
+---
+# Source: sausage-store/charts/frontend/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-frontend-service
+  namespace: r-devops-magistracy-project-2sem-879048678
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/instance: "test"
+    app.kubernetes.io/version: "latest"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "frontend-0.1.0"
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: test
+spec:
+  type: ClusterIP
+  selector:
+    app: test-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+# Source: sausage-store/charts/infra/templates/mongodb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  labels:
+    app: mongodb
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: mongodb
+  clusterIP: None
+---
+# Source: sausage-store/charts/infra/templates/postgresql.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: postgres
+  clusterIP: None
+---
+# Source: sausage-store/charts/backend-report/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-backend-report
+  namespace: r-devops-magistracy-project-2sem-879048678
+  labels:
+    app.kubernetes.io/name: backend-report
+    app.kubernetes.io/instance: "test"
+    app.kubernetes.io/version: "latest"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "backend-report-0.1.0"
+    app.kubernetes.io/component: backend-report
+    app.kubernetes.io/part-of: test
+spec:
+  revisionHistoryLimit: 15
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: test-backend-report
+  template:
+    metadata:
+      labels:
+        app: test-backend-report
+    spec:
+      containers:
+        - name: backend-report
+          image: arturdzh/sausage-backend-report:latest
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: test-backend-report-conf
+                  key: PORT
+            - name: DB
+              valueFrom:
+                secretKeyRef:
+                  name: test-backend-report-secret
+                  key: DB
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi 
+          ports:
+            - name: backend-report
+              containerPort: 8080
+          livenessProbe:
+            failureThreshold: "3"
+            httpGet:
+              path: /api/v1/health
+              port: "8080"
+            initialDelaySeconds: "30"
+            periodSeconds: "10"
+            timeoutSeconds: "3"
+---
+# Source: sausage-store/charts/backend/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-backend
+  namespace: r-devops-magistracy-project-2sem-879048678
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/instance: "test"
+    app.kubernetes.io/version: "latest"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "backend-0.1.0"
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: test
+spec:
+  revisionHistoryLimit: 15
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: "1"
+      maxUnavailable: "1"
+    type: RollingUpdate 
+  selector:
+    matchLabels:
+      app: test-backend
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        app: test-backend
+    spec:
+      containers:
+        - name: backend
+          image: arturdzh/sausage-backend:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: test-backend-conf
+                  key: postgres_uri
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: test-backend-conf
+                  key: postgres_user
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: test-backend-conf
+                  key: postgres_password
+            - name: REPORT_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: test-backend-conf
+                  key: report_path
+            - name: LOG_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: test-backend-conf
+                  key: log_path
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi 
+          ports:
+            - name: backend
+              containerPort: 8080
+          livenessProbe:
+            failureThreshold: "3"
+            httpGet:
+              path: /actuator/health
+              port: "8080"
+            initialDelaySeconds: "30"
+            periodSeconds: "10"
+            timeoutSeconds: "3" 
+      volumes:
+      - name: test-backend-conf
+        configMap:
+          name: test-backend-conf
+          items:
+            - key: postgres_uri
+              path: postgres_uri
+            - key: postgres_user
+              path: postgres_user
+            - key: postgres_password
+              path: postgres_password
+            - key: report_path
+              path: report_path
+            - key: log_path
+              path: log_path
+---
+# Source: sausage-store/charts/frontend/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-frontend
+  namespace: r-devops-magistracy-project-2sem-879048678
+  labels:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/instance: "test"
+    app.kubernetes.io/version: "latest"
+    app.kubernetes.io/managed-by: "Helm"
+    helm.sh/chart: "frontend-0.1.0"
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: test
+spec:
+  revisionHistoryLimit: 15
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: test-frontend
+  template:
+    metadata:
+      labels:
+        app: test-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: arturdzh/sausage-frontend:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: "1"
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi 
+          ports:
+            - name: frontend
+              containerPort: 8080
+          volumeMounts:
+          - name: test-frontend-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+      volumes:
+        - name: test-frontend-conf
+          configMap:
+            name: test-frontend-conf
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+---
+# Source: sausage-store/charts/backend-report/templates/deployment.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: test-backend-report-hpa
+  namespace: r-devops-magistracy-project-2sem-879048678
+spec:
+  scaleTargetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: test-backend-report
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+# Source: sausage-store/charts/infra/templates/mongodb.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  annotations:
+    helm.sh/hook-weight: "-5"
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:7.0
+        envFrom:
+          - configMapRef:
+              name: mongodb-conf
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+# Source: sausage-store/charts/infra/templates/postgresql.yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        envFrom:
+          - configMapRef:
+              name: postgres-conf
+        ports:
+        - containerPort: 5432
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+# Source: sausage-store/charts/frontend/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-frontend-ingress
+spec:
+  ingressClassName: "nginx"
+  tls:
+    - hosts:
+        - front-artur.2sem.students-projects.ru
+      secretName: 2sem-students-projects-wildcard-secret
+  rules:
+    - host: front-artur.2sem.students-projects.ru
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: test-frontend-service
+              port:
+                number: 80
+---
+# Source: sausage-store/charts/backend/templates/deployment.yaml
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: test-backend-vpa
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: test-backend
+  updatePolicy:
+    updateMode: Auto 
+  resourcePolicy:
+    containerPolicies:
+    - containerName: '*'
+      maxAllowed:
+        cpu: "2"
+        memory: 1Gi
+      minAllowed:
+        cpu: 100m
+        memory: 128Mi

@@ -102,16 +102,28 @@ jobs:
           uses: actions/checkout@v3
         - name: Install Helm
           uses: azure/setup-helm@v4
+        - name: Install helm-push plugin
+          run: |
+            helm plugin install https://github.com/chartmuseum/helm-push
+        - name: Add Nexus Helm repo
+          run: |
+            helm repo add nexus ${{ secrets.NEXUS_HELM_REPO }} \
+              --username ${{ secrets.NEXUS_HELM_REPO_USER }} \
+              --password ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
         - name: Package Helm chart
           run: |
             helm dependency update ./sausage-store-chart
             helm package ./sausage-store-chart --destination ./packages
-        - name: Push Helm chart to Nexus repository
+        - name: Push Helm chart to Nexus using cm-push
           run: |
-            CHART_PACKAGE=$(ls ./packages/*.tgz)
-            curl -v --user "$NEXUS_HELM_REPO_USER:$NEXUS_HELM_REPO_PASSWORD" \
-              --upload-file "$CHART_PACKAGE" \
-              "$NEXUS_HELM_REPO/"
+            cd ./packages
+            helm cm-push --context-path="/repository/${{ secrets.NEXUS_HELM_REPO_NAME }}" *.tgz nexus
+        # - name: Push Helm chart to Nexus repository
+        #   run: |
+        #     CHART_PACKAGE=$(ls ./packages/*.tgz)
+        #     curl -v --user "$NEXUS_HELM_REPO_USER:$NEXUS_HELM_REPO_PASSWORD" \
+        #       --upload-file "$CHART_PACKAGE" \
+        #       "$NEXUS_HELM_REPO/"
 
   # Деплоим приложения в кластер Kubernetes с помощью helm-чарт
   deploy_helm_chart_to_kubernetes:

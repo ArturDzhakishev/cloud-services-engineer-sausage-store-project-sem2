@@ -117,7 +117,7 @@ jobs:
         - name: Push Helm chart to Nexus using cm-push
           run: |
             cd ./packages
-            helm cm-push --context-path="/repository/${{ secrets.NEXUS_HELM_REPO_NAME }}" *.tgz nexus
+            helm cm-push --context-path="/repository/dzhakishev-final" *.tgz nexus
         # - name: Push Helm chart to Nexus repository
         #   run: |
         #     CHART_PACKAGE=$(ls ./packages/*.tgz)

@@ -13,8 +13,8 @@ metadata:
     app.kubernetes.io/component: {{ .Chart.Name }}
     app.kubernetes.io/part-of: {{ .Release.Name }}
 spec:
-  revisionHistoryLimit: {{ .Values.backend-report.revisionHistoryLimit }}
-  replicas: {{ .Values.backend-report.replicas }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  replicas: {{ .Values.replicas }}
   strategy:
     type: Recreate
   selector:
@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.backend-report.image }}
+          image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           env:
             - name: PORT
@@ -40,12 +40,12 @@ spec:
                   name: {{ .Release.Name }}-{{ .Chart.Name }}-secret
                   key: DB
           resources:
-{{ toYaml .Values.backend-report.resources | indent 12 }} 
+{{ toYaml .Values.resources | indent 12 }} 
           ports:
             - name: {{ .Chart.Name }}
-              containerPort: {{ .Values.backend-report.containerPort }}
+              containerPort: {{ .Values.containerPort }}
           livenessProbe:
-{{ toYaml .Values.backend-report.livenessProbe | indent 12 }}
+{{ toYaml .Values.livenessProbe | indent 12 }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -57,12 +57,12 @@ spec:
     apiVersion: "apps/v1"
     kind: Deployment
     name: {{ .Release.Name }}-{{ .Chart.Name }}
-  minReplicas: {{ .Values.backend-report.hpa.minReplicas }}
-  maxReplicas: {{ .Values.backend-report.hpa.maxReplicas }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.backend-report.hpa.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}

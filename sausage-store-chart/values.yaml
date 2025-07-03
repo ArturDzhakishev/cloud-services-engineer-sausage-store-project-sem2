@@ -19,7 +19,7 @@ frontend:
     path: /
     pathType: Prefix
   secretName: 2sem-students-projects-wildcard-secret
-  containerPort: 80
+  containerPort: 8080
   image: arturdzh/sausage-frontend:latest
   resources:
     requests:
@@ -131,4 +131,7 @@ infra:
     env:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      host: mongodb       # имя сервиса MongoDB в кластере
+      port: 27017
+      database: reports
     containerPort: 27017

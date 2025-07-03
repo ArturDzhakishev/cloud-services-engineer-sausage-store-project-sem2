@@ -99,14 +99,13 @@ jobs:
       steps:
       #### Опишите необходимые шаги
         - name: Check out the repo
-          # Получение исходного кода из репозитория:
           uses: actions/checkout@v3
         - name: Install Helm
           uses: azure/setup-helm@v4
         - name: Package Helm chart
           run: |
-            helm dependency update ./charts/sausage-store
-            helm package ./charts/sausage-store --destination ./packages
+            helm dependency update ./charts/sausage-store-chart
+            helm package ./charts/sausage-chart --destination ./packages
         - name: Push Helm chart to Nexus repository
           run: |
             CHART_PACKAGE=$(ls ./packages/*.tgz)

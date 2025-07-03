@@ -104,8 +104,8 @@ jobs:
           uses: azure/setup-helm@v4
         - name: Package Helm chart
           run: |
-            helm dependency update ./charts/sausage-store-chart
-            helm package ./charts/sausage-chart --destination ./packages
+            helm dependency update ./sausage-store-chart
+            helm package ./sausage-chart --destination ./packages
         - name: Push Helm chart to Nexus repository
           run: |
             CHART_PACKAGE=$(ls ./packages/*.tgz)

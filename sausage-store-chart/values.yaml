@@ -27,7 +27,7 @@ frontend:
       cpu: "100m"
     limits:
       memory: "128Mi"
-      cpu: "500m"
+      cpu: "200m"
   nginxConf: nginx.conf
 
 backend:
@@ -56,10 +56,10 @@ backend:
   resources:
     requests:
       memory: "256Mi"
-      cpu: "100m"
+      cpu: "500m"
     limits:
       memory: "512Mi"
-      cpu: "500m"
+      cpu: "900m"
   containerPort: 8080
   livenessProbe:
     httpGet:
@@ -77,11 +77,11 @@ backend:
       containerPolicies:
         - containerName: "*"
           minAllowed:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "300m"
+            memory: "180Mi"
           maxAllowed:
-            cpu: "2"
-            memory: "1Gi"
+            cpu: "900m"
+            memory: "800Mi"
   ### Опишите VPA для бэкенда
 
 backend-report:
@@ -93,11 +93,11 @@ backend-report:
   containerPort: 8080
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "100m"
+      memory: "128Mi"
+      cpu: "150m"
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: "256Mi"
+      cpu: "300m"
   service:
     containerPort: 8080
   livenessProbe:

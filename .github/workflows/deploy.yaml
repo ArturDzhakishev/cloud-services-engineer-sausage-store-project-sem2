@@ -143,6 +143,9 @@ jobs:
           run: |
             kubectl get pods,deployments,services -n $SAUSAGE_STORE_NAMESPACE
 
+        - name: Debug helm template output
+          run: helm template sausage-store nexus/sausage-store --debug
+
         # Деплой чарта в Kubernetes
         - name: Deploy Helm chart
           env:

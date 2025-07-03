@@ -22,7 +22,8 @@ spec:
       app: {{ .Release.Name }}-{{ .Chart.Name }}
   template:
     metadata:
-      app: {{ .Release.Name }}-{{ .Chart.Name }}
+      labels:
+        app: {{ .Release.Name }}-{{ .Chart.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}

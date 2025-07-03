@@ -8,18 +8,18 @@ global:
 
 frontend:
 ### В чарте frontend отсутствуют некоторые важные файлы. Поймите какие и опишите их.
-  replicas: 1
-  revisionHistoryLimit: 15
+  replicas: "1"
+  revisionHistoryLimit: "15"
   strategy:
     type: Recreate
   service:
-    port: 80
+    port: "80"
   ingress:
     host: front-artur.2sem.students-projects.ru # Корректный домен будет указан в задании
     path: /
     pathType: Prefix
   secretName: 2sem-students-projects-wildcard-secret
-  containerPort: 8080
+  containerPort: "8080"
   image: arturdzh/sausage-frontend:latest
   resources:
     requests:
@@ -42,14 +42,14 @@ backend:
     reportPath: /logs/reports
     logPath: /logs
   service:
-    port: 8080
-  revisionHistoryLimit: 15
-  replicas: 1
+    port: "8080"
+  revisionHistoryLimit: "15"
+  replicas: "1"
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 1
+      maxUnavailable: "1"
+      maxSurge: "1"
   ### Опишите стратегию RollingUpdate для бэкенда
   image: arturdzh/sausage-backend:latest
   imagePullPolicy: Always
@@ -60,15 +60,15 @@ backend:
     limits:
       memory: "512Mi"
       cpu: "1"
-  containerPort: 8080
+  containerPort: "8080"
   livenessProbe:
     httpGet:
       path: /actuator/health
-      port: 8080
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 3
-    failureThreshold: 3
+      port: "8080"
+    initialDelaySeconds: "30"
+    periodSeconds: "10"
+    timeoutSeconds: "3"
+    failureThreshold: "3"
   ### Опишите LivenessProbe для бэкенда
   vpa:
     updatePolicy:
@@ -87,8 +87,8 @@ backend:
 backend-report:
   env:
     port: "8080"
-  revisionHistoryLimit: 15
-  replicas: 1
+  revisionHistoryLimit: "15"
+  replicas: "1"
   image: arturdzh/sausage-backend-report:latest
   resources:
     requests:
@@ -97,20 +97,20 @@ backend-report:
     limits:
       memory: "512Mi"
       cpu: "1"
-  containerPort: 8080
+  containerPort: "8080"
   livenessProbe:
     httpGet:
       path: /api/v1/health
-      port: 8080
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 3
-    failureThreshold: 3
+      port: "8080"
+    initialDelaySeconds: "30"
+    periodSeconds: "10"
+    timeoutSeconds: "3"
+    failureThreshold: "3"
   hpa:
     enabled: true
-    minReplicas: 1
-    maxReplicas: 5
-    targetCPUUtilizationPercentage: 70
+    minReplicas: "1"
+    maxReplicas: "5"
+    targetCPUUtilizationPercentage: "70"
   secret:
     DB: "mongodb://root:rootpassword@mongodb:27017/reports"
 ### Опишите значения для backend-report
@@ -121,7 +121,7 @@ backend-report:
 
 infra:
   postgresql:
-    containerPort: 5432
+    containerPort: "5432"
     env:
       POSTGRES_USER: store
       POSTGRES_PASSWORD: storepassword
@@ -132,6 +132,6 @@ infra:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
       host: mongodb       # имя сервиса MongoDB в кластере
-      port: 27017
+      port: "27017"
       database: reports
-    containerPort: 27017
+    containerPort: "27017"

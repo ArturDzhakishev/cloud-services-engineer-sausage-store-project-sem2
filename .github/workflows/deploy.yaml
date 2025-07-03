@@ -136,12 +136,12 @@ jobs:
           run: |
             mkdir -p $HOME/.kube
             echo "$KUBE_CONFIG" > $HOME/.kube/config
+            cat $HOME/.kube/config
 
         # Проверим, что можем подключиться
         - name: Test kubectl connection
           run: |
-            kubectl cluster-info
-            kubectl get ns
+            kubectl get pods,deployments,services -n $SAUSAGE_STORE_NAMESPACE
 
         # Деплой чарта в Kubernetes
         - name: Deploy Helm chart

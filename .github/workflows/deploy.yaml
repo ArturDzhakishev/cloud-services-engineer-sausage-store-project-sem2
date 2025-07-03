@@ -7,9 +7,9 @@ on:
 
 env:
   NEXUS_HELM_REPO: ${{ secrets.NEXUS_HELM_REPO }}
-  NEXUS_HELM_REPO_USER: ${{ secrets.NEXUS_HELM_REPO_USER }}
-  NEXUS_HELM_REPO_PASSWORD: ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
-  SAUSAGE_STORE_NAMESPACE: YOUR_NAMESPACE
+  NEXUS_HELM_REPO_USER: ${{ secrets.NEXUS_USER }}
+  NEXUS_HELM_REPO_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+  SAUSAGE_STORE_NAMESPACE: r-devops-magistracy-project-2sem-879048678
   KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
   VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
@@ -76,7 +76,7 @@ jobs:
             # Для каждого пересобранного образа 
             # устанавливаем тег latest, чтобы потом
             # на сервере и в docker-compose.yml не указывать версию образа:
-            tags: YOUR_DOCKERHUB/sausage-backend:latest
+            tags: arturdzh/sausage-backend:latest
             build-args: |
               VERSION=${{ github.sha }}
         - name: Push Frontend to DockerHub
@@ -84,13 +84,13 @@ jobs:
           with:
             context: ./frontend/
             push: true
-            tags: YOUR_DOCKERHUB/sausage-frontend:latest
+            tags: arturdzh/sausage-frontend:latest
         - name: Push Backend-report to DockerHub
           uses: docker/build-push-action@v4
           with:
             context: ./backend-report/
             push: true
-            tags: YOUR_DOCKERHUB/sausage-backend-report:latest
+            tags: arturdzh/sausage-backend-report:latest
   # Упаковываем helm-чарт и пушим его в Nexus
   add_helm_chart_to_nexus:
       name: Add Helm Chart To Nexus
@@ -108,13 +108,9 @@ jobs:
             helm dependency update ./charts/sausage-store
             helm package ./charts/sausage-store --destination ./packages
         - name: Push Helm chart to Nexus repository
-          env:
-            NEXUS_USER: ${{ secrets.NEXUS_USER }}
-            NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-            NEXUS_HELM_REPO: ${{ secrets.NEXUS_HELM_REPO }}
           run: |
             CHART_PACKAGE=$(ls ./packages/*.tgz)
-            curl -v --user "$NEXUS_USER:$NEXUS_PASSWORD" \
+            curl -v --user "$NEXUS_HELM_REPO_USER:$NEXUS_HELM_REPO_PASSWORD" \
               --upload-file "$CHART_PACKAGE" \
               "$NEXUS_HELM_REPO/"
 
@@ -130,21 +126,17 @@ jobs:
 
         # Добавляем Helm-репозиторий Nexus
         - name: Add Helm repository (Nexus)
-          env:
-            NEXUS_HELM_REPO: ${{ secrets.NEXUS_HELM_REPO }}
-            NEXUS_USER: ${{ secrets.NEXUS_USER }}
-            NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           run: |
             helm repo add nexus $NEXUS_HELM_REPO \
-              --username $NEXUS_USER \
-              --password $NEXUS_PASSWORD
+              --username $NEXUS_HELM_REPO_USER \
+              --password $NEXUS_HELM_REPO_PASSWORD
             helm repo update
 
         # Добавляем kubeconfig (секретом)
         - name: Set up kubeconfig
           run: |
             mkdir -p $HOME/.kube
-            echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
+            echo "$KUBE_CONFIG" | base64 --decode > $HOME/.kube/config
 
         # Проверим, что можем подключиться
         - name: Test kubectl connection
@@ -155,10 +147,9 @@ jobs:
         # Деплой чарта в Kubernetes
         - name: Deploy Helm chart
           env:
-            RELEASE_NAME: sausage-store  # или ваше название релиза
-            NAMESPACE: r-devops-magistracy-project-2sem-879048678
-            CHART_NAME: nexus/sausage-store-chart # имя чарта в репозитории Nexus
+            RELEASE_NAME: sausage-store
+            CHART_NAME: nexus/sausage-store-chart
           run: |
             helm upgrade --install $RELEASE_NAME $CHART_NAME \
-              --namespace $NAMESPACE
+              --namespace $SAUSAGE_STORE_NAMESPACE
       #### Опишите необходимые шаги

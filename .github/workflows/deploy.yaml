@@ -105,7 +105,7 @@ jobs:
         - name: Package Helm chart
           run: |
             helm dependency update ./sausage-store-chart
-            helm package ./sausage-chart --destination ./packages
+            helm package ./sausage-store-chart --destination ./packages
         - name: Push Helm chart to Nexus repository
           run: |
             CHART_PACKAGE=$(ls ./packages/*.tgz)

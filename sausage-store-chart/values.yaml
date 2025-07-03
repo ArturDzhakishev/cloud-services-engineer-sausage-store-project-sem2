@@ -90,6 +90,7 @@ backend-report:
   revisionHistoryLimit: "15"
   replicas: "1"
   image: arturdzh/sausage-backend-report:latest
+  containerPort: 8080
   resources:
     requests:
       memory: "256Mi"
@@ -102,7 +103,7 @@ backend-report:
   livenessProbe:
     httpGet:
       path: /api/v1/health
-      port: "8080"
+      port: 8080
     initialDelaySeconds: 30
     periodSeconds: 10
     timeoutSeconds: 3

@@ -97,7 +97,8 @@ backend-report:
     limits:
       memory: "512Mi"
       cpu: "1"
-  containerPort: "8080"
+  service:
+    containerPort: "8080"
   livenessProbe:
     httpGet:
       path: /api/v1/health

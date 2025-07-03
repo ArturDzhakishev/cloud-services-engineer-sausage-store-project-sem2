@@ -107,9 +107,9 @@ jobs:
             helm plugin install https://github.com/chartmuseum/helm-push
         - name: Add Nexus Helm repo
           run: |
-            helm repo add nexus ${{ secrets.NEXUS_HELM_REPO }} \
-              --username ${{ secrets.NEXUS_HELM_REPO_USER }} \
-              --password ${{ secrets.NEXUS_HELM_REPO_PASSWORD }}
+            helm repo add nexus $NEXUS_HELM_REPO \
+              --username $NEXUS_HELM_REPO_USER \
+              --password $NEXUS_HELM_REPO_PASSWORD
         - name: Package Helm chart
           run: |
             helm dependency update ./sausage-store-chart

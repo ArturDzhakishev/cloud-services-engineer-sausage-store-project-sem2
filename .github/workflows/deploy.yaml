@@ -10,7 +10,7 @@ env:
   NEXUS_HELM_REPO_USER: ${{ secrets.NEXUS_USER }}
   NEXUS_HELM_REPO_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   SAUSAGE_STORE_NAMESPACE: r-devops-magistracy-project-2sem-879048678
-  KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+  KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
   VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
 jobs:

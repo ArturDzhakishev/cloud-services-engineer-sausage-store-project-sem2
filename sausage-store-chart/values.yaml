@@ -114,7 +114,7 @@ backend-report:
     maxReplicas: "5"
     targetCPUUtilizationPercentage: "70"
   secret:
-    DB: "mongodb://root:rootpassword@mongodb:27017/reports"
+    DB: "mongodb://host.docker.internal:27017/reports"
 ### Опишите значения для backend-report
 ### Приложение должно использовать стратегию Recreate
 ### Приложение использует переменную PORT - порт, на котором оно запустится и DB - Uri-подключение к mongodb. 

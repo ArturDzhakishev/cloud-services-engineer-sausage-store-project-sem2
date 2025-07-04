@@ -19,6 +19,9 @@ spec:
         envFrom:
           - configMapRef:
               name: postgres-conf
+        env:
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
         ports:
         - containerPort: {{ .Values.postgresql.containerPort }}
         resources:
@@ -30,7 +33,7 @@ spec:
             cpu: "500m"
         volumeMounts:
         - name: postgres-data
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql/data/pgdata
   volumeClaimTemplates:
   - metadata:
       name: postgres-data

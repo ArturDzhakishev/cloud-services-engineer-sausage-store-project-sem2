@@ -64,8 +64,6 @@ spec:
           ports:
             - name: {{ .Chart.Name }}
               containerPort: {{ .Values.containerPort }}
-#           livenessProbe:
-# {{ toYaml .Values.livenessProbe | indent 12 }} 
       volumes:
       - name: {{ .Release.Name }}-{{ .Chart.Name }}-conf
         configMap:

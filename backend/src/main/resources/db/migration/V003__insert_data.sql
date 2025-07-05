@@ -13,7 +13,7 @@ SELECT
     i, 
     (ARRAY['pending', 'shipped', 'cancelled'])[floor(random() * 3 + 1)], 
     DATE(NOW() - (random() * (NOW()+'90 days' - NOW()))) 
-FROM generate_series(1, 10000000) AS s(i);
+FROM generate_series(1, 10000) AS s(i);
 
 -- Заполним таблицу order_product
 INSERT INTO order_product (quantity, order_id, product_id) 
@@ -21,4 +21,4 @@ SELECT
     floor(1+random()*50)::int, 
     i, 
     1 + floor(random()*6)::int % 6 
-FROM generate_series(1, 10000000) s(i);
+FROM generate_series(1, 10000) s(i);

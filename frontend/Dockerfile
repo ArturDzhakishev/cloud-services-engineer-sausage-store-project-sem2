@@ -24,7 +24,7 @@ RUN rm -rf /usr/share/nginx/html/*
 #  && chown -R appuser:appgroup /var/cache/nginx
 
 # COPY default.conf /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
@@ -33,4 +33,4 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # USER appuser
 
 
-EXPOSE 8080
+EXPOSE 80

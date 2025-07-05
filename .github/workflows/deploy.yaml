@@ -14,34 +14,6 @@ env:
   VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
 jobs:
-#   deploy:
-#     name: Deploy
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout repo
-#         uses: actions/checkout@v3
-      
-#       - name: Copy project to server
-#         uses: appleboy/scp-action@master
-#         with:
-#           host: ${{ secrets.HOST }}
-#           username: ${{ secrets.USERSERV }}
-#           key: ${{ secrets.SSH_KEY }}
-#           source: "."
-#           target: "/home/user/sausge-store"
-
-#       - name: Executing remote ssh commands to deploy
-#         uses: appleboy/ssh-action@master
-#         with:
-#           host: ${{ secrets.HOST }}
-#           username: ${{ secrets.USERSERV }}
-#           key: ${{ secrets.SSH_KEY }}
-#           script: |
-#             cd /home/user/sausge-store/ 
-#             sudo docker-compose -f docker-compose.yml pull
-#             sudo docker-compose -f docker-compose.yml down
-#             sudo docker-compose -f docker-compose.yml up -d
-
   # Сборка и пуш образов в докерхаб:
   build_and_push_to_docker_hub:
       name: Push Docker image to DockerHub
@@ -118,12 +90,6 @@ jobs:
           run: |
             cd ./packages
             helm cm-push --context-path="/repository/dzhakishev-final" *.tgz nexus
-        # - name: Push Helm chart to Nexus repository
-        #   run: |
-        #     CHART_PACKAGE=$(ls ./packages/*.tgz)
-        #     curl -v --user "$NEXUS_HELM_REPO_USER:$NEXUS_HELM_REPO_PASSWORD" \
-        #       --upload-file "$CHART_PACKAGE" \
-        #       "$NEXUS_HELM_REPO/"
 
   # Деплоим приложения в кластер Kubernetes с помощью helm-чарт
   deploy_helm_chart_to_kubernetes:
@@ -165,5 +131,5 @@ jobs:
             CHART_NAME: nexus/sausage-store
           run: |
             helm upgrade --install $RELEASE_NAME $CHART_NAME \
-              --namespace $SAUSAGE_STORE_NAMESPACE
+              --namespace $SAUSAGE_STORE_NAMESPACE --set global.vault.vaultToken=${VAULT_TOKEN}
       #### Опишите необходимые шаги

@@ -1,9 +1,9 @@
 global:
   imagePullPolicy: Always
-  ###vault:
-  ###  host: ip
-  ###  name: vault
-  ###  vaultToken: someToken
+  vault:
+   host: 158.160.98.215
+   name: vault
+   vaultToken: someToken
 
 
 frontend:

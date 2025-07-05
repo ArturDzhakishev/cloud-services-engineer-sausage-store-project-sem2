@@ -19,7 +19,7 @@ frontend:
     path: /
     pathType: Prefix
   secretName: 2sem-students-projects-wildcard-secret
-  containerPort: 8080
+  containerPort: 80
   image: arturdzh/sausage-frontend:latest
   resources:
     requests:

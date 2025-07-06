@@ -1,36 +1,37 @@
-# Sausage Store
+# Сосисочная — интернет-магазин «Sausage Store»
+
+## Рабочий вариант: https://front-artur.2sem.students-projects.ru
 
 ![image](https://user-images.githubusercontent.com/9394918/121517767-69db8a80-c9f8-11eb-835a-e98ca07fd995.png)
 
+## Description
+
+Интернет-магазин «Сосисочная» — сервис, позволяющий пользователям:
+- Добавлять товары в корзину
+- Удалять товары из корзины
+- Оформлять заказы
+- Сохранять отчёты об активности пользователей
 
 ## Technologies used
 
 * Frontend – TypeScript, Angular.
 * Backend  – Java 16, Spring Boot, Spring Data.
-* Database – H2.
+* Backend-report - Go.
+* Database – PostgreSQL, MongoDB.
+* Infrastructure - Kubernetes, Helm
+* Secrets - HashiCorp Vault
 
 ## Installation guide
-### Backend
 
-Install Java 16 and maven and run:
-
+Для развертывания используйте команду:
 ```bash
-cd backend
-mvn package
-cd target
-java -jar sausage-store-0.0.1-SNAPSHOT.jar
+helm upgrade --install sausage-store ./sausage-store-chart \
+  --set global.vault.vaultToken=VAULT_TOKEN
 ```
+Укажите ваш актуальный Vault Token для доступа к секретам.
 
-### Frontend
+CI/CD: Автодеплой осуществляется через GitHub Actions. Достаточно выполнить git push, чтобы изменения прошли сборку и раскатились в кластер Kubernetes.
 
-Install NodeJS and npm on your computer and run:
 
-```bash
-cd frontend
-npm install
-npm run build
-npm install -g http-server
-sudo http-server ./dist/frontend/ -p 80 --proxy http://localhost:8080
-```
-
-Then open your browser and go to [http://localhost](http://localhost)
+          livenessProbe:
+{{ toYaml .Values.livenessProbe | indent 12 }} 

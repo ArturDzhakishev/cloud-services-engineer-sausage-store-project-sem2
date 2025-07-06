@@ -65,10 +65,10 @@ backend:
     httpGet:
       path: /actuator/health
       port: 8080
-    initialDelaySeconds: 120
+    initialDelaySeconds: 90
     periodSeconds: 10
     timeoutSeconds: 3
-    failureThreshold: 3
+    failureThreshold: 5
   ### Опишите LivenessProbe для бэкенда
   vpa:
     updatePolicy:

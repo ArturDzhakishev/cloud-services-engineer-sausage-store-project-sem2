@@ -31,7 +31,3 @@ helm upgrade --install sausage-store ./sausage-store-chart \
 Укажите ваш актуальный Vault Token для доступа к секретам.
 
 CI/CD: Автодеплой осуществляется через GitHub Actions. Достаточно выполнить git push, чтобы изменения прошли сборку и раскатились в кластер Kubernetes.
-
-
-          livenessProbe:
-{{ toYaml .Values.livenessProbe | indent 12 }} 
